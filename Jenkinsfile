@@ -4,6 +4,8 @@ pipeline {
     environment {
         ZIP_NAME = "archived_txt_files.zip"
         ARCHIVE_DIR = "archive"
+        // Укажите абсолютный путь, где вы хотите хранить архив на Jenkins агенте
+        SAVE_PATH = "/var/lib/jenkins/archives"
     }
 
     stages {
@@ -27,10 +29,22 @@ pipeline {
             }
         }
 
-        stage('Save Archive') {
+        stage('Save to Jenkins Agent') {
             steps {
-                echo "Saving archive..."
-                // Используем относительный путь
+                script {
+                    // Копируем архив в постоянную директорию на агенте
+                    sh '''
+                        mkdir -p ${SAVE_PATH}
+                        cp ${ARCHIVE_DIR}/${ZIP_NAME} ${SAVE_PATH}/
+                    '''
+                    echo "Archive saved at ${SAVE_PATH}/${ZIP_NAME}"
+                }
+            }
+        }
+
+        stage('Save Archive to Jenkins Web Interface') {
+            steps {
+                // Сохраняем архив как артефакт в Jenkins
                 archiveArtifacts artifacts: "${ARCHIVE_DIR}/${ZIP_NAME}", fingerprint: true
             }
         }
@@ -39,7 +53,7 @@ pipeline {
     post {
         always {
             cleanWs()
-            echo "The archive is saved at ${WORKSPACE}/${ARCHIVE_DIR}/${ZIP_NAME}"
+            echo "Pipeline completed. Archive stored at ${SAVE_PATH}/${ZIP_NAME} on Jenkins agent."
         }
     }
 }
