@@ -5,7 +5,7 @@ pipeline {
         ZIP_NAME = "archived_txt_files.zip"
         ARCHIVE_DIR = "archive"
         // Укажите абсолютный путь, где вы хотите хранить архив на Jenkins агенте
-        SAVE_PATH = "/var/lib/jenkins/archives"
+        SAVE_PATH = "/home/jenkins/archives"
     }
 
     stages {
