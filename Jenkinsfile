@@ -2,17 +2,14 @@ pipeline {
     agent any
 
     environment {
-        // Имя архива
         ZIP_NAME = "archived_txt_files.zip"
-        // Путь, куда сохраняем архив на Jenkins агенте
-        ARCHIVE_DIR = "${WORKSPACE}/archive"
+        ARCHIVE_DIR = "archive"
     }
 
     stages {
         stage('Checkout') {
             steps {
                 echo 'Cloning repository...'
-                // Клонируем репозиторий с GitHub
                 git branch: 'main', url: 'https://github.com/karvontx/Myproject-test.git'
             }
         }
@@ -21,7 +18,6 @@ pipeline {
             steps {
                 script {
                     echo 'Archiving .txt files...'
-                    // Создаем директорию для архива, копируем .txt файлы и архивируем их
                     sh '''
                         mkdir -p ${ARCHIVE_DIR}
                         find . -name "*.txt" -exec cp {} ${ARCHIVE_DIR}/ \\;
@@ -33,7 +29,8 @@ pipeline {
 
         stage('Save Archive') {
             steps {
-                // Сохранение архива как артефакт в Jenkins
+                echo "Saving archive..."
+                // Используем относительный путь
                 archiveArtifacts artifacts: "${ARCHIVE_DIR}/${ZIP_NAME}", fingerprint: true
             }
         }
@@ -41,8 +38,8 @@ pipeline {
 
     post {
         always {
-            // Очищаем временные файлы, если необходимо
-            echo "The archive is stored at ${ARCHIVE_DIR}/${ZIP_NAME} on the Jenkins agent."
+            cleanWs()
+            echo "The archive is saved at ${WORKSPACE}/${ARCHIVE_DIR}/${ZIP_NAME}"
         }
     }
 }
